@@ -21,7 +21,7 @@ mongoose
   });
 app.use(express.json());
 app.use("/api/user", userRouter);
-app.use("/api/auth/signup", authRouter);
+app.use("/api/auth", authRouter);
 
 // middleware to handle errors
 app.use((err, req, res, next) => {

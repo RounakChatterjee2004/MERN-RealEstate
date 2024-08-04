@@ -6,13 +6,14 @@ export default function SignUp() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate(null);
+
   const handleChange = (e) => {
     setFormData({
-      ...formData, // Copy all existing data
+      ...formData, // Copy all existing data in the form
       [e.target.id]: e.target.value, //update the new data
     });
 
-    console.log(formData);
+    // console.log(formData);
   };
 
   const handleSubmit = async (e) => {
@@ -38,6 +39,8 @@ export default function SignUp() {
       setLoading(false);
       console.log(data);
       setError(null);
+      // navigate the user to the sign-in page since the user has signed up successfully
+
       navigate("/sign-in");
     } catch (err) {
       setLoading(false);
