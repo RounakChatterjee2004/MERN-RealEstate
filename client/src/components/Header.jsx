@@ -50,9 +50,6 @@ export default function Header() {
                 src={currUser.avatar}
                 alt="profileimage"
                 className="h-7 w-7 rounded-full object-cover"
-                onError={(e) => {
-                  e.target.src = "default-avatar-url"; // Replace with your default avatar URL
-                }}
               />
             ) : (
               <li className="text-slate-700 hover:underline">Sign in</li>
