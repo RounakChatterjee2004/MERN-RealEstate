@@ -18,8 +18,8 @@ import {
   signoutFailure,
   signoutSuccess,
 } from "../redux/user/userSlice";
-
 import { Link } from "react-router-dom";
+
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const fileRef = useRef(null);
@@ -32,7 +32,8 @@ export default function Profile() {
   const storage = getStorage(app);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const dispatch = useDispatch();
-
+  const [showListingsError, setshowListingsError] = useState(false);
+  const [userListings, setUserListings] = useState([]);
   const handleFileUpload = (file) => {
     const fileName = new Date().getTime() + file.name; //unique file name
     const storageRef = ref(storage, fileName);
@@ -61,6 +62,7 @@ export default function Profile() {
       handleFileUpload(file);
     }
   }, [file]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -96,7 +98,7 @@ export default function Profile() {
         method: "DELETE",
       });
 
-      const data = res.json();
+      const data = await res.json();
 
       if (data.success === false) {
         dispatch(deleteUserFailure(data.message));
@@ -108,6 +110,7 @@ export default function Profile() {
       dispatch(deleteUserFailure(err.message));
     }
   };
+
   const handleSignOut = async () => {
     try {
       dispatch(signoutStart());
@@ -119,9 +122,27 @@ export default function Profile() {
       }
       dispatch(signoutSuccess(data));
     } catch (error) {
-      dispatch(signoutFailure(data.message));
+      dispatch(signoutFailure(error.message));
     }
   };
+
+  const showListings = async () => {
+    try {
+      setshowListingsError(false);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+
+      if (data.success === false) {
+        setshowListingsError(true);
+        return;
+      }
+      setUserListings(data);
+    } catch (err) {
+      setshowListingsError(true);
+      console.log(err.message);
+    }
+  };
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -206,6 +227,47 @@ export default function Profile() {
       <p className="text-green-700 mt-5">
         {updateSuccess ? "User is updated successfully!" : ""}
       </p>
+
+      <button className="text-green-700 w-full" onClick={showListings}>
+        Show Listings
+      </button>
+
+      <p className="text-green-700 mt-5">
+        {showListingsError ? "Error in showing listings!" : ""}
+      </p>
+
+      {userListings && userListings.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h1 className="text-center mt-7 text-2xl font-semibold">
+            Your Listings
+          </h1>
+          {userListings.map((listing) => (
+            <div
+              key={listing._id}
+              className="border rounded-lg p-3 flex justify-between items-center gap-4"
+            >
+              <Link to={`/listing/${listing._id}`}>
+                <img
+                  src={listing.imageUrls[0]}
+                  alt="listing cover"
+                  className="h-16 w-16 object-contain"
+                />
+              </Link>
+              <Link
+                className="text-slate-700 font-semibold  hover:underline truncate flex-1"
+                to={`/listing/${listing._id}`}
+              >
+                <p>{listing.name}</p>
+              </Link>
+
+              <div className="flex flex-col item-center">
+                <button className="text-red-700 uppercase">Delete</button>
+                <button className="text-green-700 uppercase">Edit</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
