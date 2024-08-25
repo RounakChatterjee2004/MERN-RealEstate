@@ -13,6 +13,9 @@ import {
   FaShare,
 } from "react-icons/fa";
 
+import { useSelector } from "react-redux";
+import Contact from "../components/Contact";
+
 export default function Listing() {
   SwiperCore.use([Navigation]);
 
@@ -20,8 +23,10 @@ export default function Listing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [contact, setContact] = useState(false);
 
   const params = useParams();
+  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -31,7 +36,7 @@ export default function Listing() {
         const data = await res.json();
 
         if (data.success === false) {
-          console.error("Error fetching listing:", data); // Log the entire response
+          console.error("Error fetching listing:", data);
           setError(true);
           setLoading(false);
           return;
@@ -41,7 +46,7 @@ export default function Listing() {
         setLoading(false);
         setError(false);
       } catch (error) {
-        console.error("Network or server error:", error); // Log network errors
+        console.error("Network or server error:", error);
         setError(true);
         setLoading(false);
       }
@@ -93,7 +98,7 @@ export default function Listing() {
 
           <div className="flex flex-col max-w-4xl mx-auto p-3 my-7 gap-4">
             <p className="text-2xl font-semibold">
-              {listing.name} - ${" "}
+              {listing.name} - $
               {listing.offer
                 ? listing.discountPrice.toLocaleString("en-US")
                 : listing.regularPrice.toLocaleString("en-US")}
@@ -143,6 +148,17 @@ export default function Listing() {
                 {listing.furnished ? "Furnished" : "Unfurnished"}
               </li>
             </ul>
+
+            {currentUser && listing.userRef !== currentUser._id && !contact && (
+              <button
+                onClick={() => setContact(true)}
+                className="bg-slate-700 text-white rounded-lg hover:opacity-95 p-3"
+              >
+                Contact Landlord
+              </button>
+            )}
+
+            {contact && <Contact listing={listing} />}
           </div>
         </div>
       )}
