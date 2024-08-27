@@ -69,3 +69,47 @@ export const getListing = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getListings = async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit) || 9;
+    const start = parseInt(req.query.start) || 0;
+    let offer = req.query.offer;
+    if (offer === undefined || offer === false) {
+      offer = { $in: [false, true] }; // make the offer equal to false and true since it is not defined
+    }
+    let furnished = req.query.furnished;
+    if (furnished === undefined || furnished === false) {
+      furnished = { $in: [false, true] }; // make the furnished equal to false and true since it is not defined
+    }
+    let parking = req.query.parking;
+    if (parking === undefined || parking === false) {
+      parking = { $in: [false, true] }; // make the parking equal to false and true since it is not defined
+    }
+    let type = req.query.type;
+
+    if (type === undefined || type === false) {
+      type = { $in: ["sale", "rent"] }; // make the type equal to sale and rent since it is not defined
+    }
+
+    const searchTerm = req.query.searchTerm || "";
+    const sort = req.query.sort || "createdAt";
+    const order = req.query.order || "desc";
+    const listings = await Listing.find({
+      // regex means it will search the word/ part of the word => in this case we are searching by title
+      //options i means dont care about the lowertcase or the upper case
+
+      name: { $regex: searchTerm, $options: "i" },
+      offer,
+      furnished,
+      parking,
+      type,
+    })
+      .sort({ [sort]: order })
+      .limit(limit)
+      .skip(start);
+    return res.status(200).json(listings);
+  } catch (err) {
+    next(err);
+  }
+};
