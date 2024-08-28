@@ -69,36 +69,44 @@ export const getListing = async (req, res, next) => {
     next(err);
   }
 };
-
+// Get multiple listings with filters
 export const getListings = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 9;
-    const start = parseInt(req.query.start) || 0;
-    let offer = req.query.offer;
-    if (offer === undefined || offer === false) {
-      offer = { $in: [false, true] }; // make the offer equal to false and true since it is not defined
-    }
-    let furnished = req.query.furnished;
-    if (furnished === undefined || furnished === false) {
-      furnished = { $in: [false, true] }; // make the furnished equal to false and true since it is not defined
-    }
-    let parking = req.query.parking;
-    if (parking === undefined || parking === false) {
-      parking = { $in: [false, true] }; // make the parking equal to false and true since it is not defined
-    }
-    let type = req.query.type;
+    const startIndex = parseInt(req.query.startIndex) || 0;
 
-    if (type === undefined || type === false) {
-      type = { $in: ["sale", "rent"] }; // make the type equal to sale and rent since it is not defined
-    }
+    // Handle boolean query parameters
+    let offer =
+      req.query.offer === "true"
+        ? true
+        : req.query.offer === "false"
+        ? false
+        : { $in: [true, false] };
+    let furnished =
+      req.query.furnished === "true"
+        ? true
+        : req.query.furnished === "false"
+        ? false
+        : { $in: [true, false] };
+    let parking =
+      req.query.parking === "true"
+        ? true
+        : req.query.parking === "false"
+        ? false
+        : { $in: [true, false] };
+
+    // Handle type parameter
+    let type =
+      req.query.type && req.query.type !== "all"
+        ? req.query.type
+        : { $in: ["sale", "rent"] };
 
     const searchTerm = req.query.searchTerm || "";
     const sort = req.query.sort || "createdAt";
-    const order = req.query.order || "desc";
-    const listings = await Listing.find({
-      // regex means it will search the word/ part of the word => in this case we are searching by title
-      //options i means dont care about the lowertcase or the upper case
+    const order = req.query.order === "asc" ? 1 : -1;
 
+    // Fetch listings with applied filters
+    const listings = await Listing.find({
       name: { $regex: searchTerm, $options: "i" },
       offer,
       furnished,
@@ -107,9 +115,10 @@ export const getListings = async (req, res, next) => {
     })
       .sort({ [sort]: order })
       .limit(limit)
-      .skip(start);
+      .skip(startIndex);
+
     return res.status(200).json(listings);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
