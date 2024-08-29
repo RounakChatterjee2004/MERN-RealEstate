@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ListingItem from "../components/ListingItem";
+
 export default function Search() {
   const navigate = useNavigate();
   const [sidebardata, setSidebardata] = useState({
@@ -15,6 +16,7 @@ export default function Search() {
 
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -42,6 +44,9 @@ export default function Search() {
       try {
         const res = await fetch(`/api/listing/get?${searchQuery}`);
         const data = await res.json();
+        if (data.length > 8) {
+          setShowMore(true);
+        }
         setListings(data);
       } catch (error) {
         console.error("Error fetching listings:", error);
@@ -78,6 +83,20 @@ export default function Search() {
     urlParams.set("sort", sidebardata.sort || "createdAt");
     urlParams.set("order", sidebardata.order || "desc");
     navigate(`/search?${urlParams.toString()}`);
+  };
+
+  const onShowMoreClick = async () => {
+    const numberOfListings = listings.length;
+    const startIndex = numberOfListings;
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set("startIndex", startIndex);
+    const searchQuery = urlParams.toString();
+    const res = await fetch(`/api/listing/get?${searchQuery}`);
+    const data = await res.json();
+    if (data.length < 9) {
+      setShowMore(false);
+    }
+    setListings([...listings, ...data]);
   };
 
   return (
@@ -199,6 +218,15 @@ export default function Search() {
           </ul>
         ) : (
           <p>No listings found</p>
+        )}
+
+        {showMore && (
+          <button
+            onClick={onShowMoreClick}
+            className="text-green-700 p-7 hover:underline text-center w-full  "
+          >
+            Show More
+          </button>
         )}
       </div>
     </div>
