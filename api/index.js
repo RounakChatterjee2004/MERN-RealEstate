@@ -24,12 +24,20 @@ mongoose
 
 const __dirname = path.resolve();
 
+const allowedOrigins = [
+  "http://localhost:5173:", // Development URL
+  "https://mern-realestate-t3qy.onrender.com/", // Replace with your actual frontend production URL
+];
+// Configure CORS
 app.use(
   cors({
-    origin: "https://mern-realestate-t3qy.onrender.com", // Adjust this to your deployed frontend URL
+    origin: allowedOrigins,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api/user", userRouter);
