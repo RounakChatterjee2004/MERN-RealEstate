@@ -26,7 +26,7 @@ const __dirname = path.resolve();
 
 app.use(
   cors({
-    origin: "https://mern-realestate-1-enx9.onrender.com", // Adjust this to your deployed frontend URL
+    origin: "https://mern-realestate-t3qy.onrender.com/", // Adjust this to your deployed frontend URL
     credentials: true,
   })
 );
