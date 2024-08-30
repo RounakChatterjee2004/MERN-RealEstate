@@ -26,7 +26,7 @@ const __dirname = path.resolve();
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // Adjust the origin to your front-end URL
+    origin: "https://mern-realestate-1-enx9.onrender.com", // Adjust this to your deployed frontend URL
     credentials: true,
   })
 );
